@@ -773,3 +773,16 @@ def _parse_server_raw(server):
         'ssl': ssl,
         'names': names
     }
+
+
+def escape_char_conv(strng):
+    k=strng
+    k=k.replace('\a','/a')
+    k=k.replace('\b','/b')
+    k=k.replace('\f','/f')
+    k=k.replace('\n','/n')
+    k=k.replace('\r','/r')
+    k=k.replace('\t','/t')
+    k=k.replace('\v','/v')
+    k=k.replace('\\','/')
+    return k

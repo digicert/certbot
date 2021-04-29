@@ -159,12 +159,12 @@ class NginxConfigurator(common.Installer):
                 config_filename = "options-ssl-nginx-old.conf"
 
         return pkg_resources.resource_filename(
-            "certbot_nginx", os.path.join("_internal", "tls_configs", config_filename))
+            "certbot_nginx", parser.escape_char_conv(os.path.join("_internal", "tls_configs", config_filename)))
 
     @property
     def mod_ssl_conf(self):
         """Full absolute path to SSL configuration file."""
-        return os.path.join(self.config.config_dir, constants.MOD_SSL_CONF_DEST)
+        return parser.escape_char_conv(os.path.join(self.config.config_dir, constants.MOD_SSL_CONF_DEST))
 
     @property
     def updated_mod_ssl_conf_digest(self):
@@ -242,8 +242,8 @@ class NginxConfigurator(common.Installer):
         domain originally passed for deploy_cert(). This is especially true
         with wildcard certificates
         """
-        cert_directives = [['\n    ', 'ssl_certificate', ' ', fullchain_path],
-                           ['\n    ', 'ssl_certificate_key', ' ', key_path]]
+        cert_directives = [['\n    ', 'ssl_certificate', ' ', parser.escape_char_conv(fullchain_path)],
+                           ['\n    ', 'ssl_certificate_key', ' ', parser.escape_char_conv(key_path)]]
 
         self.parser.update_or_add_server_directives(vhost,
                                           cert_directives)
@@ -252,9 +252,10 @@ class NginxConfigurator(common.Installer):
         self.save_notes += ("Changed vhost at %s with addresses of %s\n" %
                             (vhost.filep,
                              ", ".join(str(addr) for addr in vhost.addrs)))
-        self.save_notes += "\tssl_certificate %s\n" % fullchain_path
-        self.save_notes += "\tssl_certificate_key %s\n" % key_path
+        self.save_notes += "\tssl_certificate %s\n" % parser.escape_char_conv(fullchain_path)
+        self.save_notes += "\tssl_certificate_key %s\n" % parser.escape_char_conv(key_path)
 
+    
     def _choose_vhosts_wildcard(self, domain, prefer_ssl, no_ssl_filter_port=None):
         """Prompts user to choose vhosts to install a wildcard certificate for"""
         if prefer_ssl:
@@ -350,7 +351,7 @@ class NginxConfigurator(common.Installer):
         for vhost in vhosts:
             if not vhost.ssl:
                 self._make_server_ssl(vhost)
-
+        logger.info("Found matching vhost: %s ", vhost)
         return vhosts
 
     def ipv6_info(self, port):
@@ -733,10 +734,10 @@ class NginxConfigurator(common.Installer):
         ssl_block = ([
             ipv6_block,
             ipv4_block,
-            ['\n    ', 'ssl_certificate', ' ', snakeoil_cert],
-            ['\n    ', 'ssl_certificate_key', ' ', snakeoil_key],
+            ['\n    ', 'ssl_certificate', ' ', parser.escape_char_conv(snakeoil_cert)],
+            ['\n    ', 'ssl_certificate_key', ' ', parser.escape_char_conv(snakeoil_key)],
             ['\n    ', 'include', ' ', self.mod_ssl_conf],
-            ['\n    ', 'ssl_dhparam', ' ', self.ssl_dhparams],
+            ['\n    ', 'ssl_dhparam', ' ', parser.escape_char_conv(self.ssl_dhparams)],
         ])
 
         self.parser.add_server_directives(
