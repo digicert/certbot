@@ -11,7 +11,6 @@ from certbot import errors
 from certbot.compat import os
 from certbot.plugins import common
 from certbot_nginx._internal import nginxparser
-from certbot_nginx._internal import parser
 from certbot_nginx._internal import obj
 
 logger = logging.getLogger(__name__)
@@ -39,8 +38,8 @@ class NginxHttp01(common.ChallengePerformer):
 
     def __init__(self, configurator):
         super().__init__(configurator)
-        self.challenge_conf = parser.escape_char_conv(os.path.join(
-            configurator.config.config_dir, "le_http_01_cert_challenge.conf"))
+        self.challenge_conf = os.path.join(
+            configurator.config.config_dir, "le_http_01_cert_challenge.conf")
 
     def perform(self):
         """Perform a challenge on Nginx.
